@@ -56,6 +56,9 @@ RUN chmod -R 775 storage bootstrap/cache && \
 # Instalando dependências de frontend do Laravel (opcional, para Laravel Mix ou Vite)
 RUN npm install && npm run build
 
+# Copiando arquivos do projeto para o container
+COPY . .
+
 # Expondo a porta 5000
 EXPOSE 5000
 
