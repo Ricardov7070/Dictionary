@@ -8,18 +8,22 @@ use App\Models\Words\Words_Dictionary;
 use App\Models\FavoriteWords\FavoriteWords;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Models\Words\LogWords_Visited;
+
 
 class wordsManagementController extends Controller
 {
 
     protected $modelWords;
     protected $modelFavorites;
+    protected $modelLogWords;
 
 
-    public function __construct (Words_Dictionary $modelWords, FavoriteWords $modelFavorites) {
+    public function __construct (Words_Dictionary $modelWords, FavoriteWords $modelFavorites, LogWords_Visited $modelLogWords) {
 
         $this->modelWords = $modelWords;
         $this->modelFavorites = $modelFavorites;
+        $this->modelLogWords = $modelLogWords;
 
     }
 
@@ -206,7 +210,7 @@ class wordsManagementController extends Controller
 
                     return response()->json([
                         'success' => 'Removed from favorites successfully!',
-                    ], 201);
+                    ], 204);
 
                 }
 
@@ -239,21 +243,69 @@ class wordsManagementController extends Controller
 
             } else {
 
+                $this->modelLogWords->wordHistory($existingWord, auth()->id());
+
                 $dataSelectedWord = $this->modelWords->wordData($word);
 
-                dd($dataSelectedWord);
-
+                return response()->json([
+                    'results' => $dataSelectedWord,
+                ]);
+        
             }
     
         } catch (\Throwable $th) {
-
-            dd($th);
         
             return response()->json([
                 'error' => 'An error occurred, try again!',
             ], 500);
     
         }   
+
+    }
+
+
+    public function viewSelectedRecords (Request $request, $id_user): JsonResponse {
+
+        try {
+     
+            if (auth()->id() !== (int) $id_user) {
+
+                return response()->json([
+                    'message' => 'Unauthorized access.',
+                ], 403);
+
+            }
+
+            $search = $request->query('search', null);
+            $page = (int) $request->query('page', 1);
+            $limit = (int) $request->query('limit', 5);
+            $order = $request->query('order', 'asc');
+
+            $paginatedHistory = $this->modelLogWords->viewSelectedWords($id_user, $limit, $search, $page, $order);
+
+            return response()->json([
+                'results' => $paginatedHistory->items(),
+                'totalDocs' => $paginatedHistory->total(),
+                'page' => $paginatedHistory->currentPage(),
+                'totalPages' => $paginatedHistory->lastPage(),
+                'hasNext' => $paginatedHistory->hasMorePages(),
+                'hasPrev' => $paginatedHistory->currentPage() > 1,
+            ]);
+
+        } catch (ValidationException $e) {
+
+            return response()->json([
+                'message' => 'Error when viewing the history of searched words!',
+                'errors' => $e->errors(),
+            ], 400);
+
+        } catch (\Throwable $th) {
+
+            return response()->json([
+                'error' => 'An error occurred, try again!',
+            ], 500);
+
+        }
 
     }
 

@@ -8,6 +8,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Cache;
 
 
 class User extends Authenticatable
@@ -43,22 +44,22 @@ class User extends Authenticatable
 
 
     public function userValidation ($request): array {
-
+ 
         return self::where('name', $request->input('name'))
-                    ->where('email', $request->input('email'))
-                    ->whereNull('deleted_at')
-                    ->get()
-                    ->toArray();
+            ->where('email', $request->input('email'))
+            ->whereNull('deleted_at')
+            ->get()
+            ->toArray();
 
     }
 
 
     public function userEmailValidation ($request): array {
-
+        
         return self::where('email', $request->input('email'))
-                    ->whereNull('deleted_at')
-                    ->get()
-                    ->toArray();
+            ->whereNull('deleted_at')
+            ->get()
+            ->toArray();
 
     }
 
@@ -66,18 +67,18 @@ class User extends Authenticatable
     public function viewUsers (): array {
 
         return self::whereNull('deleted_at')
-                    ->select('id', 'name', 'email', 'created_at', 'updated_at')
-                    ->get()
-                    ->map(function ($user) {
-                        return [
-                            'id' => $user->id,
-                            'name' => $user->name,
-                            'email' => $user->email,
-                            'created_at' => $user->created_at->format('d/m/Y'),
-                            'updated_at' => $user->updated_at->format('d/m/Y'),
-                        ];
-                    })
-                    ->toArray();
+            ->select('id', 'name', 'email', 'created_at', 'updated_at')
+            ->get()
+            ->map(function ($user): array {
+                return [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'created_at' => $user->created_at->format('d/m/Y'),
+                    'updated_at' => $user->updated_at->format('d/m/Y'),
+                ];
+            })
+            ->toArray();
 
     }
 
@@ -118,10 +119,10 @@ class User extends Authenticatable
 
 
     public function searchUser ($id_user): ?User {
-
+         
         return self::where('id', $id_user)
-                    ->whereNull('deleted_at')
-                    ->first(); 
+            ->whereNull('deleted_at')
+            ->first();
 
     }
 

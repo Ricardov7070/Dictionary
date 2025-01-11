@@ -4,10 +4,11 @@ namespace App\Http\Controllers\Api;
 
 use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 
 class wordsApiProxyController extends Controller
 {
-    public function fetchWordDetails ($word) {
+    public function fetchWordDetails ($word): JsonResponse {
 
         $baseUrl = 'https://wordsapiv1.p.rapidapi.com/words/';
 

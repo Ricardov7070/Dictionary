@@ -1,23 +1,22 @@
 <?php
 
-namespace App\Models\FavoriteWords;
+namespace App\Models\Words;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use App\Models\Words\Words_Dictionary;
 use Carbon\Carbon;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Cache;
 
 
-class FavoriteWords extends Authenticatable
+class LogWords_Visited extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable; 
 
-    protected $table = 'favorite_words';
+    protected $table = 'logwords_visited';
 
     protected $fillable = [
         'users_id',
@@ -34,53 +33,20 @@ class FavoriteWords extends Authenticatable
     
     }
 
+    
+    public function wordHistory ($existingWord, $id_user): void {
 
-    public function checkWordStatus ($existingWord, $id_user): array {
-
-        $cacheKey = "word_status_{$id_user}_word_{$existingWord[0]['id']}";
-
-        return Cache::remember($cacheKey, 3600, function () use ($existingWord, $id_user): array {
-        
-            return self::where('users_id', $id_user)
-                ->where('words_dictionary_id', $existingWord[0]['id'])
-                ->whereNull('deleted_at')
-                ->get()
-                ->toArray();
-
-        });
-
-    }
-
-
-    public function favoriteWords ($existingWord, $id_user): array {
-
-        $favorite = self::create([
+        self::create([
             'users_id' => $id_user,
             'words_dictionary_id' => $existingWord[0]['id'],
             'created_at' => now(),
             'updated_at' => now(),
         ]);
-    
-        return [
-            'word' => $existingWord[0]['words'],
-            'updated_at' => $favorite->created_at->format('d/m/Y'),
-        ];
-
+        
     }
 
 
-    public function removeWord ($validation): void {
-
-        $favorite = self::findOrFail($validation[0]['id']);
-
-        $favorite->update([
-            'deleted_at' => now(),
-        ]);
-
-    }
-
-    
-    public function viewFavoriteWords ($id_user, $limit, $search, $page, $order): LengthAwarePaginator {
+    public function viewSelectedWords ($id_user, $limit, $search, $page, $order): LengthAwarePaginator {
 
         $cacheKey = "favorite_words_{$id_user}_search_{$search}_page_{$page}_order_{$order}_limit_{$limit}";
 
@@ -91,7 +57,7 @@ class FavoriteWords extends Authenticatable
                 ->whereHas('words_dictionary', function ($query): void {
                     $query->whereNull('deleted_at');
                 })
-                ->with(['words_dictionary' => function ($query) {
+                ->with(['words_dictionary' => function ($query): void {
                     $query->select('id', 'words');
                 }]);
 
@@ -108,7 +74,7 @@ class FavoriteWords extends Authenticatable
             $paginated = $query->paginate($limit, ['*'], 'page', $page);
 
             $transformedResults = $paginated->getCollection()->map(function ($favorite): array {
-              
+               
                 return [
                     'word' => $favorite->words_dictionary->words,
                     'added' => Carbon::parse($favorite->updated_at)->format('d/m/Y'),

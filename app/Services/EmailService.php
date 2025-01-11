@@ -18,7 +18,7 @@ class EmailService
     }
 
     
-    private function configureMail () {
+    private function configureMail (): void {
 
         $this->mail->isSMTP();                                   
         $this->mail->Host = env('MAIL_HOST');  
@@ -31,7 +31,7 @@ class EmailService
     }
 
 
-    public function sendEmail ($to, $subject, $body, $from) {     
+    public function sendEmail ($to, $subject, $body, $from): void {     
         
         $this->mail->setFrom($from ?? env('MAIL_FROM_ADDRESS'), env('MAIL_FROM_NAME'));
         $this->mail->addAddress($to);

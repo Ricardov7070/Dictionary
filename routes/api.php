@@ -30,6 +30,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/entries/en/{id_user}/{word}/unfavorite', [wordsManagementController::class, 'removeFavorite']);
     
     Route::get('/user/me/', [UserManagementController::class, 'viewAuthenticatedProfile']);
+    Route::get('/user/me/{id_user}/history', [wordsManagementController::class, 'viewSelectedRecords']);
     Route::post('/user/me/{id_user}/favorites', [wordsManagementController::class, 'viewFavoriteRecords']);
 
 });
