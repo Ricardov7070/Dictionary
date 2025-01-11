@@ -3,55 +3,65 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Support\Facades\Auth;
 use App\Models\Users\User;
+use App\Http\Requests\userManagementRequests\UserLoginRequest;
+use App\Http\Requests\userManagementRequests\UserRegisterRequest;
+use App\Http\Requests\userManagementRequests\UserUpdateRequest;
+use App\Http\Requests\userManagementRequests\forgotPasswordRequest;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Hash;
+use App\Services\EmailService;
 
 class userManagementController extends Controller
 {
     
-    protected $modelUser;
+    protected $modelUsers;
+    protected $emailService;
 
-    public function __construct (User $modelUser) {
 
-        $this->modelUser = $modelUser;
+    public function __construct (User $modelUsers, EmailService $emailService) {
+
+        $this->modelUsers = $modelUsers;
+        $this->emailService = $emailService;
 
     }
 
 
-    public function userAuthentication (Request $request) {
+    public function index (): JsonResponse {
+
+        return response()->json([
+            'message' => "Fullstack Challenge 🏅 - Dictionary"
+        ], 200);
+
+    }
+
+
+    public function userAuthentication (UserLoginRequest $request): JsonResponse {
 
         try {
-
-            $request->validate([
-                'email' => 'required|string|email',
-                'password' => 'required|string|min:8',
-            ], [
-                'email.required' => 'The email field is mandatory.',
-                'email.email' => 'The email provided is invalid.',
-                'password.required' => 'The password field is mandatory.',
-                'password.min' => 'Password must be at least 8 characters long.',
-            ]);
-    
     
             $credentials = $request->only('email', 'password');
-    
-            if (Auth::attempt($credentials)) {
-    
-                $user = $request->user();
-                $token = $user->createToken('auth_token')->plainTextToken;
-            
+
+            $user = $this->modelUsers::where('email', $credentials['email'])->whereNull('deleted_at')->first();
+
+            if (!$user || !Hash::check($credentials['password'], $user->password)) {
+
                 return response()->json([
-                    "access_token" => $token,
-                    "token_type" => 'Bearer'
-                ]);
-            
+                    'message' => 'Invalid credentials!',
+                ], 400);
+
             }
-    
+
+            $token = $user->createToken('auth_token')->plainTextToken;
+
             return response()->json([
-                'message' => 'Invalid credentials!',
-            ], 400);
+                'success' => 'Login successful!',
+                'id_user' => $user->id,
+                'user' => $user->name,
+                'access_token' => $token,
+                'token_type' => 'Bearer',
+            ], 200);
     
         } catch (ValidationException $e) {
       
@@ -64,39 +74,29 @@ class userManagementController extends Controller
         
             return response()->json([
                 'error' => 'An error occurred, try again!',
-            ], 400);
-    
+            ], 500);
+            
         }    
-
 
     }
 
 
-    public function registerUsers (Request $request) {
+    public function registerUsers (UserRegisterRequest $request): JsonResponse {
 
         try {
 
-            $request->validate([
-                'email' => 'required|string|email',
-                "name" => 'required|string|min:3|max:255',
-                'password' => 'required|string|min:8',
-            ], [
-                'email.required' => 'The email field is mandatory.',
-                'email.email' => 'The email provided is invalid.',
-                'name.required' => 'The name field is mandatory.',
-                'name.string' => 'The name field must be a valid string.',
-                'name.min' => 'The name field must be at least 3 characters long.',
-                'name.max' => 'The name field cannot exceed 255 characters.',
-                'password.required' => 'The password field is mandatory.',
-                'password.min' => 'Password must be at least 8 characters long.',
-            ]);
+            $record = $this->validatorUsersRegistered($request);
+
+            if ($record->getData() !== []) {
+                return $record;
+            }
     
-           $user = $this->modelUser->createUser($request);
-    
+            $user = $this->modelUsers->createUser($request);
+
             return response()->json([
-                'message' => 'Sucesso!',
+                'success' => 'Successfully registered!',
                 'user' => $user
-            ], 200);
+            ], 200);       
     
         } catch (ValidationException $e) {
       
@@ -109,11 +109,311 @@ class userManagementController extends Controller
         
             return response()->json([
                 'error' => 'An error occurred, try again!',
-            ], 400);
+            ], 500);            
     
         }    
 
     }
 
+
+    public function validatorUsersRegistered ($request): JsonResponse {
+
+        $userValidation = $this->modelUsers->userValidation($request);
+
+        if (!empty($userValidation)) {
+
+            return response()->json([
+                'message' => 'User already registered!',
+            ], 400);
+        
+        }
+
+        $userEmailValidation = $this->modelUsers->userEmailValidation($request);
+
+        if (!empty($userEmailValidation)) {
+
+            return response()->json([
+                'message' => 'Email already registered with another user!',
+            ], 400);
+        
+        }
+
+        return response()->json([], 200);
+
+    }
+
+
+    public function forgotPassword (forgotPasswordRequest $request): JsonResponse {
+
+        try {
+
+            $existingUser = $this->modelUsers->userValidation($request);
+
+            if (!$existingUser) {
+
+                return response()->json([
+                    'message' => 'Invalid "Name" or "Email"!',
+                ], 400);
+
+            } else {
+
+                $content = $this->modelUsers->randomUserPassword($existingUser);
+
+                $this->emailService->sendEmail(
+                                              $request->input('email'), 
+                                         'Authentication Password!', 
+                                            'Your generated random password is: ' . $content, 
+                                            null
+                                              );
+
+                return response()->json([
+                    'success' => 'Email sent successfully!',
+                ], 200);
+
+            }
+
+        } catch (ValidationException $e) {
+      
+            return response()->json([
+                'message' => 'Error sending email!',
+                'errors' => $e->errors(),
+            ], 400);
+    
+        } catch (\Throwable $th) {
+        
+            return response()->json([
+                'error' => 'An error occurred, try again!',
+            ], 500);
+    
+        }   
+
+    }
+
+
+    public function viewAuthenticatedProfile (): JsonResponse {
+
+        try {
+
+            $existingUser = $this->modelUsers->searchUser(auth()->id());
+
+            return response()->json([
+                'status' => 'Authenticated!',
+                'id' => $existingUser->id,
+                'name' => $existingUser->name,
+                'email' => $existingUser->email,
+                'created_at' => $existingUser->created_at->format('d/m/Y'),
+                'updated_at' => $existingUser->updated_at->format('d/m/Y')
+            ]);
+    
+        } catch (\Throwable $th) {
+        
+            return response()->json([
+                'error' => 'An error occurred, try again!',
+            ], 500);
+    
+        }   
+
+    }
+
+
+    public function viewRecord (): JsonResponse {
+
+        try {
+
+            $user = $this->modelUsers->viewUsers();
+
+            return response()->json([
+                'users' => $user
+            ]);     
+    
+        } catch (\Throwable $th) {
+        
+            return response()->json([
+                'error' => 'An error occurred, try again!',
+            ], 500);
+    
+        }   
+
+    }
+
+
+    public function updateRecord (UserUpdateRequest $request, $id_user): JsonResponse {
+
+        try {
+
+            if (auth()->id() !== (int) $id_user) {
+
+                return response()->json([
+                    'message' => 'Unauthorized access.',
+                ], 403);
+
+            }
+
+            $existingUser = $this->modelUsers->searchUser($id_user);
+
+            if (!$existingUser) {
+
+                return response()->json([
+                    'message' => 'Undefined User!',
+                ], 400);
+
+            } else {
+
+                $record = $this->usersUpdateValidator($request, $id_user);
+
+                if ($record->getData() !== []) {
+                    return $record;
+                }
+
+
+                $user = $this->modelUsers->updateUser($request, $id_user);
+
+                $existingUser->tokens()->delete();
+
+                return response()->json([
+                    'success' => 'Updated successfully!',
+                    'user' => $user
+                ], 200); 
+
+            }      
+    
+        } catch (ValidationException $e) {
+      
+            return response()->json([
+                'message' => 'Error when updating!',
+                'errors' => $e->errors(),
+            ], 400);
+    
+        } catch (\Throwable $th) {
+        
+            return response()->json([
+                'error' => 'An error occurred, try again!',
+            ], 500);
+    
+        }    
+
+    }
+
+
+    public function usersUpdateValidator ($request, $id_user): JsonResponse {
+
+        $userValidation = $this->modelUsers->userValidation($request);
+
+        if (!empty($userValidation)) {
+
+            if ($id_user != $userValidation[0]['id']) {
+
+                return response()->json([
+                    'message' => 'There is already a user with these credentials registered!',
+                ], 400);
+
+            }
+            
+        }
+
+
+        $userEmailValidation = $this->modelUsers->userEmailValidation($request);
+
+        if (!empty($userEmailValidation)) {
+
+            if ($id_user != $userEmailValidation[0]['id']) {
+
+                return response()->json([
+                    'message' => 'There is already a user with this email registered!',
+                ], 400);
+            
+            }
+    
+        }
+
+        return response()->json([], 200);
+
+    }
+
+
+    public function logoutUser ($id_user): JsonResponse {
+
+        try {
+
+            if (auth()->id() !== (int) $id_user) {
+
+                return response()->json([
+                    'message' => 'Unauthorized access.',
+                ], 403);
+
+            }
+
+            $existingUser = $this->modelUsers->searchUser($id_user);
+
+            if (!$existingUser) {
+
+                return response()->json([
+                    'message' => 'Undefined User!',
+                ], 400);
+
+            } else {
+
+                $existingUser->tokens()->delete();
+
+                return response()->json([
+                    'success' => 'Logout completed successfully!',
+                ], 200); 
+
+            }      
+    
+        } catch (\Throwable $th) {
+        
+            return response()->json([
+                'error' => 'An error occurred, try again!',
+            ], 500);
+    
+        }    
+
+    }
+
+
+    public function deleteRecord ($id_user): JsonResponse {
+
+        try {
+
+            if (auth()->id() !== (int) $id_user) {
+
+                return response()->json([
+                    'message' => 'Unauthorized access.',
+                ], 403);
+
+            }
+
+            $existingUser = $this->modelUsers->searchUser($id_user);
+
+            if (!$existingUser) {
+
+                return response()->json([
+                    'message' => 'Undefined User!',
+                ], 400);
+
+            } else {
+
+                $existingUser->tokens()->delete();
+
+                $user = $this->modelUsers->deleteUser($id_user);
+
+                return response()->json([
+                    'success' => 'Successfully deleted!',
+                    'user' => $user,
+                    'status' => 'Deletado.'
+                ], 200); 
+
+            }      
+    
+        } catch (\Throwable $th) {
+        
+            return response()->json([
+                'error' => 'An error occurred, try again!',
+            ], 500);
+    
+        }    
+
+    }
 
 }

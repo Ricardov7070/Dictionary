@@ -3,6 +3,7 @@
 namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -27,4 +28,34 @@ class Handler extends ExceptionHandler
             //
         });
     }
+
+    public function render ($request, Throwable $exception) {
+
+        if ($exception instanceof NotFoundHttpException) {
+
+            return response()->json([
+                'error' => 'Route not found. Please check the URL and try again.'
+            ], 400);
+
+        }
+
+        return parent::render($request, $exception);
+        
+    }
+
+
+    protected function unauthenticated ($request, \Illuminate\Auth\AuthenticationException $exception) {
+    
+        if ($request->expectsJson() || $request->is('api/*')) {
+
+            return response()->json([
+                'message' => 'You must be authenticated to access this resource.',
+            ], 401);
+
+        }
+
+        return parent::unauthenticated($request, $exception);
+
+    }
+    
 }

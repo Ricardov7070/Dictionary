@@ -56,6 +56,9 @@ RUN chmod -R 775 storage bootstrap/cache && \
 # Instalando dependências de frontend do Laravel (opcional, para Laravel Mix ou Vite)
 RUN npm install && npm run build
 
+# Instala a biblioteca PHPMailer
+RUN composer require phpmailer/phpmailer
+
 # Copiando arquivos do projeto para o container
 COPY . .
 
