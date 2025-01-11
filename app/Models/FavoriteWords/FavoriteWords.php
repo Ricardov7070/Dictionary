@@ -10,7 +10,6 @@ use App\Models\Words\Words_Dictionary;
 use Carbon\Carbon;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Cache;
 
 
 class FavoriteWords extends Authenticatable
@@ -36,18 +35,12 @@ class FavoriteWords extends Authenticatable
 
 
     public function checkWordStatus ($existingWord, $id_user): array {
-
-        $cacheKey = "word_status_{$id_user}_word_{$existingWord[0]['id']}";
-
-        return Cache::remember($cacheKey, 3600, function () use ($existingWord, $id_user): array {
         
-            return self::where('users_id', $id_user)
-                ->where('words_dictionary_id', $existingWord[0]['id'])
-                ->whereNull('deleted_at')
-                ->get()
-                ->toArray();
-
-        });
+        return self::where('users_id', $id_user)
+            ->where('words_dictionary_id', $existingWord[0]['id'])
+            ->whereNull('deleted_at')
+            ->get()
+            ->toArray();
 
     }
 
@@ -81,50 +74,44 @@ class FavoriteWords extends Authenticatable
 
     
     public function viewFavoriteWords ($id_user, $limit, $search, $page, $order): LengthAwarePaginator {
-
-        $cacheKey = "favorite_words_{$id_user}_search_{$search}_page_{$page}_order_{$order}_limit_{$limit}";
-
-        return Cache::remember($cacheKey, 3600, function () use ($id_user, $limit, $search, $page, $order): LengthAwarePaginator {
            
-            $query = self::where('users_id', $id_user)
-                ->whereNull('deleted_at')
-                ->whereHas('words_dictionary', function ($query): void {
-                    $query->whereNull('deleted_at');
-                })
-                ->with(['words_dictionary' => function ($query) {
-                    $query->select('id', 'words');
-                }]);
+        $query = self::where('users_id', $id_user)
+            ->whereNull('deleted_at')
+            ->whereHas('words_dictionary', function ($query): void {
+                $query->whereNull('deleted_at');
+            })
+            ->with(['words_dictionary' => function ($query) {
+                $query->select('id', 'words');
+            }]);
 
-            if ($search) {
+        if ($search) {
 
-                $query->whereHas('words_dictionary', function ($subQuery) use ($search): void {
-                    $subQuery->where('words', 'like', '%' . $search . '%');
-                });
-
-            }
-
-            $query->orderBy('updated_at', $order);
-
-            $paginated = $query->paginate($limit, ['*'], 'page', $page);
-
-            $transformedResults = $paginated->getCollection()->map(function ($favorite): array {
-              
-                return [
-                    'word' => $favorite->words_dictionary->words,
-                    'added' => Carbon::parse($favorite->updated_at)->format('d/m/Y'),
-                ];
-
+            $query->whereHas('words_dictionary', function ($subQuery) use ($search): void {
+                $subQuery->where('words', 'like', '%' . $search . '%');
             });
 
-            return new \Illuminate\Pagination\LengthAwarePaginator(
-                $transformedResults,
-                $paginated->total(),
-                $paginated->perPage(),
-                $paginated->currentPage(),
-                ['path' => $paginated->path(), 'query' => $paginated->getOptions()]
-            );
+        }
+
+        $query->orderBy('updated_at', $order);
+
+        $paginated = $query->paginate($limit, ['*'], 'page', $page);
+
+        $transformedResults = $paginated->getCollection()->map(function ($favorite): array {
+            
+            return [
+                'word' => $favorite->words_dictionary->words,
+                'added' => Carbon::parse($favorite->updated_at)->format('d/m/Y'),
+            ];
 
         });
+
+        return new \Illuminate\Pagination\LengthAwarePaginator(
+            $transformedResults,
+            $paginated->total(),
+            $paginated->perPage(),
+            $paginated->currentPage(),
+            ['path' => $paginated->path(), 'query' => $paginated->getOptions()]
+        );
 
     }
 

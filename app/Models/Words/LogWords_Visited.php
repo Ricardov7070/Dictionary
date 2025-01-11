@@ -9,7 +9,6 @@ use Laravel\Sanctum\HasApiTokens;
 use Carbon\Carbon;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Cache;
 
 
 class LogWords_Visited extends Authenticatable
@@ -47,50 +46,44 @@ class LogWords_Visited extends Authenticatable
 
 
     public function viewSelectedWords ($id_user, $limit, $search, $page, $order): LengthAwarePaginator {
-
-        $cacheKey = "favorite_words_{$id_user}_search_{$search}_page_{$page}_order_{$order}_limit_{$limit}";
-
-        return Cache::remember($cacheKey, 3600, function () use ($id_user, $limit, $search, $page, $order): LengthAwarePaginator {
            
-            $query = self::where('users_id', $id_user)
-                ->whereNull('deleted_at')
-                ->whereHas('words_dictionary', function ($query): void {
-                    $query->whereNull('deleted_at');
-                })
-                ->with(['words_dictionary' => function ($query): void {
-                    $query->select('id', 'words');
-                }]);
+        $query = self::where('users_id', $id_user)
+            ->whereNull('deleted_at')
+            ->whereHas('words_dictionary', function ($query): void {
+                $query->whereNull('deleted_at');
+            })
+            ->with(['words_dictionary' => function ($query): void {
+                $query->select('id', 'words');
+            }]);
 
-            if ($search) {
+        if ($search) {
 
-                $query->whereHas('words_dictionary', function ($subQuery) use ($search): void {
-                    $subQuery->where('words', 'like', '%' . $search . '%');
-                });
-
-            }
-
-            $query->orderBy('updated_at', $order);
-
-            $paginated = $query->paginate($limit, ['*'], 'page', $page);
-
-            $transformedResults = $paginated->getCollection()->map(function ($favorite): array {
-               
-                return [
-                    'word' => $favorite->words_dictionary->words,
-                    'added' => Carbon::parse($favorite->updated_at)->format('d/m/Y'),
-                ];
-
+            $query->whereHas('words_dictionary', function ($subQuery) use ($search): void {
+                $subQuery->where('words', 'like', '%' . $search . '%');
             });
 
-            return new \Illuminate\Pagination\LengthAwarePaginator(
-                $transformedResults,
-                $paginated->total(),
-                $paginated->perPage(),
-                $paginated->currentPage(),
-                ['path' => $paginated->path(), 'query' => $paginated->getOptions()]
-            );
+        }
+
+        $query->orderBy('updated_at', $order);
+
+        $paginated = $query->paginate($limit, ['*'], 'page', $page);
+
+        $transformedResults = $paginated->getCollection()->map(function ($favorite): array {
+            
+            return [
+                'word' => $favorite->words_dictionary->words,
+                'added' => Carbon::parse($favorite->updated_at)->format('d/m/Y'),
+            ];
 
         });
+
+        return new \Illuminate\Pagination\LengthAwarePaginator(
+            $transformedResults,
+            $paginated->total(),
+            $paginated->perPage(),
+            $paginated->currentPage(),
+            ['path' => $paginated->path(), 'query' => $paginated->getOptions()]
+        );
 
     }
 

@@ -19,6 +19,7 @@ class wordsManagementController extends Controller
     protected $modelLogWords;
 
 
+// Método Construtor
     public function __construct (Words_Dictionary $modelWords, FavoriteWords $modelFavorites, LogWords_Visited $modelLogWords) {
 
         $this->modelWords = $modelWords;
@@ -28,6 +29,21 @@ class wordsManagementController extends Controller
     }
 
 
+/**
+ * @OA\Get(
+ *     path="/api/entries/en?search=fire&limit=15&page=2&order=desc",
+ *     summary="Realiza a visualização de todas as palavras presentes no dicionário.",
+ *     tags={"Gerenciamento de Palavras"},
+ *     @OA\Response(
+ *         response=500,
+ *         description="An error occurred, try again!"
+ *     ),
+ *     @OA\Response(
+ *         response=400,
+ *         description="Error when viewing dictionary words!"
+ *     ),
+ * )
+ */
     public function wordIndex (Request $request): JsonResponse {
 
         try {
@@ -74,6 +90,29 @@ class wordsManagementController extends Controller
     }
 
 
+/**
+ * @OA\Post(
+ *     path="/api/entries/en/{id_user}/{word}/favorite",
+ *     summary="Adiciona a lista de favoritos a palavra selecionada pelo o usuário",
+ *     tags={"Gerenciamento de Palavras"},
+ *     @OA\Response(
+ *         response=200,
+ *         description="Added to favorites successfully!"
+ *     ),
+ *     @OA\Response(
+ *         response=500,
+ *         description="An error occurred, try again!"
+ *     ),
+ *     @OA\Response(
+ *         response=400,
+ *         description="Undefined Word!, The word has already been added to the favorites list!"
+ *     ),
+ *     @OA\Response(
+ *         response=403,
+ *         description="Unauthorized access."
+ *     ),
+ * )
+ */
     public function favoriteRecord ($id_user, $word): JsonResponse {
 
         try {
@@ -128,6 +167,25 @@ class wordsManagementController extends Controller
     }
 
 
+/**
+ * @OA\Post(
+ *     path="/api/user/me/{id_user}/favorites?search=fire&limit=15&page=2&order=desc",
+ *     summary="Realiza a visualização de todas as palavras adicionadas na lista de favoritos do usuário.",
+ *     tags={"Gerenciamento de Palavras"},
+ *     @OA\Response(
+ *         response=500,
+ *         description="An error occurred, try again!"
+ *     ),
+ *     @OA\Response(
+ *         response=400,
+ *         description="Error when listing favorite words!"
+ *     ),
+ *     @OA\Response(
+ *         response=403,
+ *         description="Unauthorized access."
+ *     ),
+ * )
+ */
     public function viewFavoriteRecords (Request $request, $id_user): JsonResponse {
 
         try {
@@ -174,6 +232,29 @@ class wordsManagementController extends Controller
     }
 
 
+/**
+ * @OA\Delete(
+ *     path="/api/entries/en/{id_user}/{word}/unfavorite",
+ *     summary="Realiza a exclusão das palavras adicionadas na lista de favoritos do usuário.",
+ *     tags={"Gerenciamento de Palavras"},
+ *     @OA\Response(
+ *         response=204,
+ *         description="Removed from favorites successfully!"
+ *     ),
+ *     @OA\Response(
+ *         response=500,
+ *         description="An error occurred, try again!"
+ *     ),
+ *     @OA\Response(
+ *         response=400,
+ *         description="The word is not included in the favorites list!, Undefined Word!"
+ *     ),
+ *     @OA\Response(
+ *         response=403,
+ *         description="Unauthorized access."
+ *     ),
+ * )
+ */
     public function removeFavorite ($id_user, $word): JsonResponse {
 
         try {
@@ -227,6 +308,21 @@ class wordsManagementController extends Controller
     }
 
 
+/**
+ * @OA\Post(
+ *     path="/api/entries/en/{word}",
+ *     summary="Retorna os dados da palavra pesquisada pelo o usuário.",
+ *     tags={"Gerenciamento de Palavras"},
+ *     @OA\Response(
+ *         response=500,
+ *         description="An error occurred, try again!"
+ *     ),
+ *     @OA\Response(
+ *         response=400,
+ *         description="No Definitions Found. Sorry pal, we couldn`t find definitions for the word you were looking for! You can try the search again at later time or head to the web instead."
+ *     ),
+ * )
+ */
     public function selectSpecificWord ($word): JsonResponse {
 
         try {
@@ -264,6 +360,25 @@ class wordsManagementController extends Controller
     }
 
 
+/**
+ * @OA\Get(
+ *     path="/api/user/me/{id_user}/history?search=fire&limit=15&page=2&order=desc",
+ *     summary="Realiza a visualização do histórico de palavras pesquisadas pelo o usuário.",
+ *     tags={"Gerenciamento de Palavras"},
+ *     @OA\Response(
+ *         response=500,
+ *         description="An error occurred, try again!"
+ *     ),
+ *     @OA\Response(
+ *         response=400,
+ *         description="Error when viewing the history of searched words!"
+ *     ),
+ *     @OA\Response(
+ *         response=403,
+ *         description="Unauthorized access."
+ *     ),
+ * )
+ */
     public function viewSelectedRecords (Request $request, $id_user): JsonResponse {
 
         try {

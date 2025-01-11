@@ -34,6 +34,3 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/user/me/{id_user}/favorites', [wordsManagementController::class, 'viewFavoriteRecords']);
 
 });
-
-
-

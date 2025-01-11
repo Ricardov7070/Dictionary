@@ -1,0 +1,332 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "API do Dicionário",
+        "description": "Documentação da API do Dicionário. Fullstack Challenge 🏅 - Dictionary",
+        "contact": {
+            "email": "suporte@dicionario.com"
+        },
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/": {
+            "get": {
+                "tags": [
+                    "Gerenciamento de Usuário"
+                ],
+                "summary": "Bem-Vindo ao Dicionário!",
+                "operationId": "292d5b8a7ff78774d206690e166309f2",
+                "responses": {
+                    "200": {
+                        "description": "No registration!"
+                    }
+                }
+            }
+        },
+        "/api/auth/signin": {
+            "post": {
+                "tags": [
+                    "Gerenciamento de Usuário"
+                ],
+                "summary": "Realiza a autenticação do usuário.",
+                "operationId": "1c84485bee0f29a5c9023c34192496cc",
+                "responses": {
+                    "200": {
+                        "description": "Login successful!"
+                    },
+                    "500": {
+                        "description": "An error occurred, try again!"
+                    },
+                    "400": {
+                        "description": "Invalid credentials!, Validation error!"
+                    }
+                }
+            }
+        },
+        "/api/auth/signup": {
+            "post": {
+                "tags": [
+                    "Gerenciamento de Usuário"
+                ],
+                "summary": "Realiza o registro do usuário.",
+                "operationId": "33ba43f7bdb523df1786b8e3aa290d2b",
+                "responses": {
+                    "200": {
+                        "description": "Successfully registered!"
+                    },
+                    "500": {
+                        "description": "An error occurred, try again!"
+                    },
+                    "400": {
+                        "description": "Error in registration!"
+                    }
+                }
+            }
+        },
+        "/api/auth/forgotPassword": {
+            "post": {
+                "tags": [
+                    "Gerenciamento de Usuário"
+                ],
+                "summary": "Realiza o envio de uma senha aleatória via email para o usuário que esqueceu sua chave de acesso.",
+                "operationId": "b183a00fd7c167a2e21daa7da3aca6a2",
+                "responses": {
+                    "200": {
+                        "description": "Email sent successfully!"
+                    },
+                    "500": {
+                        "description": "An error occurred, try again!"
+                    },
+                    "400": {
+                        "description": "Error sending email!, Invalid Name or Email"
+                    }
+                }
+            }
+        },
+        "/api/user/me/": {
+            "get": {
+                "tags": [
+                    "Gerenciamento de Usuário"
+                ],
+                "summary": "Realiza a visualização do usuário autenticado.",
+                "operationId": "d4ba944f0fdee7b41eb2b777c7bf796f",
+                "responses": {
+                    "500": {
+                        "description": "An error occurred, try again!"
+                    }
+                }
+            }
+        },
+        "/api/viewRecord": {
+            "get": {
+                "tags": [
+                    "Gerenciamento de Usuário"
+                ],
+                "summary": "Realiza a visualização de todos os usuário registrados.",
+                "operationId": "0819ed1d7622ab03943ab5ac2966ef2d",
+                "responses": {
+                    "500": {
+                        "description": "An error occurred, try again!"
+                    }
+                }
+            }
+        },
+        "/api/updateRecord/{id_user}": {
+            "put": {
+                "tags": [
+                    "Gerenciamento de Usuário"
+                ],
+                "summary": "Realiza a atualização de dados cadastrais do usuário registrado.",
+                "operationId": "b9b01dcab28bc3e1d965775bddb4b0f8",
+                "responses": {
+                    "200": {
+                        "description": "Updated successfully!"
+                    },
+                    "500": {
+                        "description": "An error occurred, try again!"
+                    },
+                    "400": {
+                        "description": "Undefined User!, Error when updating!"
+                    },
+                    "403": {
+                        "description": "Unauthorized access."
+                    }
+                }
+            }
+        },
+        "/api/logoutUser/{id_user}": {
+            "post": {
+                "tags": [
+                    "Gerenciamento de Usuário"
+                ],
+                "summary": "Realiza o logout do usuário atual autenticado",
+                "operationId": "f79a61a220a01b882d98413f7d0182d8",
+                "responses": {
+                    "200": {
+                        "description": "Logout completed successfully!"
+                    },
+                    "500": {
+                        "description": "An error occurred, try again!"
+                    },
+                    "400": {
+                        "description": "Undefined User!"
+                    },
+                    "403": {
+                        "description": "Unauthorized access."
+                    }
+                }
+            }
+        },
+        "/api/deleteRecord/{id_user}": {
+            "delete": {
+                "tags": [
+                    "Gerenciamento de Usuário"
+                ],
+                "summary": "Realiza a exclusão do usuário selecionado do banco de dados",
+                "operationId": "684913de67baee7289e0a4a76f32f6c4",
+                "responses": {
+                    "200": {
+                        "description": "Successfully deleted!"
+                    },
+                    "500": {
+                        "description": "An error occurred, try again!"
+                    },
+                    "400": {
+                        "description": "Undefined User!"
+                    },
+                    "403": {
+                        "description": "Unauthorized access."
+                    }
+                }
+            }
+        },
+        "/api/words/{word}": {
+            "get": {
+                "tags": [
+                    "Words API"
+                ],
+                "summary": "Integração com o proxy da Words API",
+                "operationId": "448ee3c1676cf9850e37ef1d3375e398",
+                "responses": {
+                    "400": {
+                        "description": "Failed to fetch data from Words API."
+                    }
+                }
+            }
+        },
+        "/api/entries/en?search=fire&limit=15&page=2&order=desc": {
+            "get": {
+                "tags": [
+                    "Gerenciamento de Palavras"
+                ],
+                "summary": "Realiza a visualização de todas as palavras presentes no dicionário.",
+                "operationId": "b56211a43f2cb0cf06170f8ccd9c04e7",
+                "responses": {
+                    "500": {
+                        "description": "An error occurred, try again!"
+                    },
+                    "400": {
+                        "description": "Error when viewing dictionary words!"
+                    }
+                }
+            }
+        },
+        "/api/entries/en/{id_user}/{word}/favorite": {
+            "post": {
+                "tags": [
+                    "Gerenciamento de Palavras"
+                ],
+                "summary": "Adiciona a lista de favoritos a palavra selecionada pelo o usuário",
+                "operationId": "9c200ff8e6cb932af2291816c11af00c",
+                "responses": {
+                    "200": {
+                        "description": "Added to favorites successfully!"
+                    },
+                    "500": {
+                        "description": "An error occurred, try again!"
+                    },
+                    "400": {
+                        "description": "Undefined Word!, The word has already been added to the favorites list!"
+                    },
+                    "403": {
+                        "description": "Unauthorized access."
+                    }
+                }
+            }
+        },
+        "/api/user/me/{id_user}/favorites?search=fire&limit=15&page=2&order=desc": {
+            "post": {
+                "tags": [
+                    "Gerenciamento de Palavras"
+                ],
+                "summary": "Realiza a visualização de todas as palavras adicionadas na lista de favoritos do usuário.",
+                "operationId": "a869a91990321598f917e403001d2c45",
+                "responses": {
+                    "500": {
+                        "description": "An error occurred, try again!"
+                    },
+                    "400": {
+                        "description": "Error when listing favorite words!"
+                    },
+                    "403": {
+                        "description": "Unauthorized access."
+                    }
+                }
+            }
+        },
+        "/api/entries/en/{id_user}/{word}/unfavorite": {
+            "delete": {
+                "tags": [
+                    "Gerenciamento de Palavras"
+                ],
+                "summary": "Realiza a exclusão das palavras adicionadas na lista de favoritos do usuário.",
+                "operationId": "b5ae24b55478e679c1f8b63556de38f4",
+                "responses": {
+                    "204": {
+                        "description": "Removed from favorites successfully!"
+                    },
+                    "500": {
+                        "description": "An error occurred, try again!"
+                    },
+                    "400": {
+                        "description": "The word is not included in the favorites list!, Undefined Word!"
+                    },
+                    "403": {
+                        "description": "Unauthorized access."
+                    }
+                }
+            }
+        },
+        "/api/entries/en/{word}": {
+            "post": {
+                "tags": [
+                    "Gerenciamento de Palavras"
+                ],
+                "summary": "Retorna os dados da palavra pesquisada pelo o usuário.",
+                "operationId": "fc54ab1373b4bf0e7d54a566f5ba4ef1",
+                "responses": {
+                    "500": {
+                        "description": "An error occurred, try again!"
+                    },
+                    "400": {
+                        "description": "No Definitions Found. Sorry pal, we couldn`t find definitions for the word you were looking for! You can try the search again at later time or head to the web instead."
+                    }
+                }
+            }
+        },
+        "/api/user/me/{id_user}/history?search=fire&limit=15&page=2&order=desc": {
+            "get": {
+                "tags": [
+                    "Gerenciamento de Palavras"
+                ],
+                "summary": "Realiza a visualização do histórico de palavras pesquisadas pelo o usuário.",
+                "operationId": "bc0b66958fa8128b49603f48c4da91cc",
+                "responses": {
+                    "500": {
+                        "description": "An error occurred, try again!"
+                    },
+                    "400": {
+                        "description": "Error when viewing the history of searched words!"
+                    },
+                    "403": {
+                        "description": "Unauthorized access."
+                    }
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Gerenciamento de Usuário",
+            "description": "Gerenciamento de Usuário"
+        },
+        {
+            "name": "Words API",
+            "description": "Words API"
+        },
+        {
+            "name": "Gerenciamento de Palavras",
+            "description": "Gerenciamento de Palavras"
+        }
+    ]
+}

@@ -8,6 +8,19 @@ use Illuminate\Http\JsonResponse;
 
 class wordsApiProxyController extends Controller
 {
+
+
+/**
+ * @OA\Get(
+ *     path="/api/words/{word}",
+ *     summary="Integração com o proxy da Words API",
+ *     tags={"Words API"},
+ *     @OA\Response(
+ *         response=400,
+ *         description="Failed to fetch data from Words API."
+ *     ),
+ * )
+ */
     public function fetchWordDetails ($word): JsonResponse {
 
         $baseUrl = 'https://wordsapiv1.p.rapidapi.com/words/';

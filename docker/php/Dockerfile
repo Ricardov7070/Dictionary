@@ -59,6 +59,10 @@ RUN npm install && npm run build
 # Instala a biblioteca PHPMailer
 RUN composer require phpmailer/phpmailer
 
+# Instala o Swagger
+RUN composer require darkaonline/l5-swagger && \
+    php artisan vendor:publish --provider "L5Swagger\L5SwaggerServiceProvider"
+
 # Copiando arquivos do projeto para o container
 COPY . .
 

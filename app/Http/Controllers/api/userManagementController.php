@@ -13,6 +13,18 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Hash;
 use App\Services\EmailService;
 
+
+/**
+ * @OA\Info(
+ *     title="API do Dicionário",
+ *     version="1.0.0",
+ *     description="Documentação da API do Dicionário. Fullstack Challenge 🏅 - Dictionary",
+ *     @OA\Contact(
+ *         email="suporte@dicionario.com"
+ *     )
+ * )
+ */
+
 class userManagementController extends Controller
 {
     
@@ -20,6 +32,7 @@ class userManagementController extends Controller
     protected $emailService;
 
 
+// Método Construtor
     public function __construct (User $modelUsers, EmailService $emailService) {
 
         $this->modelUsers = $modelUsers;
@@ -28,6 +41,17 @@ class userManagementController extends Controller
     }
 
 
+/**
+ * @OA\Get(
+ *     path="/api/",
+ *     summary="Bem-Vindo ao Dicionário!",
+ *     tags={"Gerenciamento de Usuário"},
+ *     @OA\Response(
+ *         response=200,
+ *         description="No registration!"
+ *     )
+ * )
+ */
     public function index (): JsonResponse {
 
         return response()->json([
@@ -37,6 +61,25 @@ class userManagementController extends Controller
     }
 
 
+/**
+ * @OA\Post(
+ *     path="/api/auth/signin",
+ *     summary="Realiza a autenticação do usuário.",
+ *     tags={"Gerenciamento de Usuário"},
+ *     @OA\Response(
+ *         response=200,
+ *         description="Login successful!"
+ *     ),
+ *     @OA\Response(
+ *         response=500,
+ *         description="An error occurred, try again!"
+ *     ),
+ *     @OA\Response(
+ *         response=400,
+ *         description="Invalid credentials!, Validation error!"
+ *     ),
+ * )
+ */
     public function userAuthentication (UserLoginRequest $request): JsonResponse {
 
         try {
@@ -81,6 +124,25 @@ class userManagementController extends Controller
     }
 
 
+/**
+ * @OA\Post(
+ *     path="/api/auth/signup",
+ *     summary="Realiza o registro do usuário.",
+ *     tags={"Gerenciamento de Usuário"},
+ *     @OA\Response(
+ *         response=200,
+ *         description="Successfully registered!"
+ *     ),
+ *     @OA\Response(
+ *         response=500,
+ *         description="An error occurred, try again!"
+ *     ),
+ *     @OA\Response(
+ *         response=400,
+ *         description="Error in registration!"
+ *     ),
+ * )
+ */
     public function registerUsers (UserRegisterRequest $request): JsonResponse {
 
         try {
@@ -115,7 +177,7 @@ class userManagementController extends Controller
 
     }
 
-
+// Realiza a validação da existência de usuários já salvos no banco de dados.
     public function validatorUsersRegistered ($request): JsonResponse {
 
         $userValidation = $this->modelUsers->userValidation($request);
@@ -143,6 +205,25 @@ class userManagementController extends Controller
     }
 
 
+/**
+ * @OA\Post(
+ *     path="/api/auth/forgotPassword",
+ *     summary="Realiza o envio de uma senha aleatória via email para o usuário que esqueceu sua chave de acesso.",
+ *     tags={"Gerenciamento de Usuário"},
+ *     @OA\Response(
+ *         response=200,
+ *         description="Email sent successfully!"
+ *     ),
+ *     @OA\Response(
+ *         response=500,
+ *         description="An error occurred, try again!"
+ *     ),
+ *     @OA\Response(
+ *         response=400,
+ *         description="Error sending email!, Invalid Name or Email"
+ *     ),
+ * )
+ */
     public function forgotPassword (forgotPasswordRequest $request): JsonResponse {
 
         try {
@@ -190,6 +271,17 @@ class userManagementController extends Controller
     }
 
 
+/**
+ * @OA\Get(
+ *     path="/api/user/me/",
+ *     summary="Realiza a visualização do usuário autenticado.",
+ *     tags={"Gerenciamento de Usuário"},
+ *     @OA\Response(
+ *         response=500,
+ *         description="An error occurred, try again!"
+ *     ),
+ * )
+ */
     public function viewAuthenticatedProfile (): JsonResponse {
 
         try {
@@ -216,6 +308,17 @@ class userManagementController extends Controller
     }
 
 
+/**
+ * @OA\Get(
+ *     path="/api/viewRecord",
+ *     summary="Realiza a visualização de todos os usuário registrados.",
+ *     tags={"Gerenciamento de Usuário"},
+ *     @OA\Response(
+ *         response=500,
+ *         description="An error occurred, try again!"
+ *     ),
+ * )
+ */
     public function viewRecord (): JsonResponse {
 
         try {
@@ -237,6 +340,29 @@ class userManagementController extends Controller
     }
 
 
+/**
+ * @OA\Put(
+ *     path="/api/updateRecord/{id_user}",
+ *     summary="Realiza a atualização de dados cadastrais do usuário registrado.",
+ *     tags={"Gerenciamento de Usuário"},
+ *     @OA\Response(
+ *         response=200,
+ *         description="Updated successfully!"
+ *     ),
+ *     @OA\Response(
+ *         response=500,
+ *         description="An error occurred, try again!"
+ *     ),
+ *     @OA\Response(
+ *         response=400,
+ *         description="Undefined User!, Error when updating!"
+ *     ),
+ *     @OA\Response(
+ *         response=403,
+ *         description="Unauthorized access."
+ *     ),
+ * )
+ */
     public function updateRecord (UserUpdateRequest $request, $id_user): JsonResponse {
 
         try {
@@ -295,6 +421,7 @@ class userManagementController extends Controller
     }
 
 
+// Realiza a validação de dados permitidos para o usuário que está atualizando suas informações no banco de dados
     public function usersUpdateValidator ($request, $id_user): JsonResponse {
 
         $userValidation = $this->modelUsers->userValidation($request);
@@ -331,6 +458,29 @@ class userManagementController extends Controller
     }
 
 
+/**
+ * @OA\Post(
+ *     path="/api/logoutUser/{id_user}",
+ *     summary="Realiza o logout do usuário atual autenticado",
+ *     tags={"Gerenciamento de Usuário"},
+ *     @OA\Response(
+ *         response=200,
+ *         description="Logout completed successfully!"
+ *     ),
+ *     @OA\Response(
+ *         response=500,
+ *         description="An error occurred, try again!"
+ *     ),
+ *     @OA\Response(
+ *         response=400,
+ *         description="Undefined User!"
+ *     ),
+ *     @OA\Response(
+ *         response=403,
+ *         description="Unauthorized access."
+ *     ),
+ * )
+ */
     public function logoutUser ($id_user): JsonResponse {
 
         try {
@@ -372,6 +522,29 @@ class userManagementController extends Controller
     }
 
 
+/**
+ * @OA\Delete(
+ *     path="/api/deleteRecord/{id_user}",
+ *     summary="Realiza a exclusão do usuário selecionado do banco de dados",
+ *     tags={"Gerenciamento de Usuário"},
+ *     @OA\Response(
+ *         response=200,
+ *         description="Successfully deleted!"
+ *     ),
+ *     @OA\Response(
+ *         response=500,
+ *         description="An error occurred, try again!"
+ *     ),
+ *     @OA\Response(
+ *         response=400,
+ *         description="Undefined User!"
+ *     ),
+ *     @OA\Response(
+ *         response=403,
+ *         description="Unauthorized access."
+ *     ),
+ * )
+ */
     public function deleteRecord ($id_user): JsonResponse {
 
         try {
