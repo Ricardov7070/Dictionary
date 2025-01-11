@@ -1,4 +1,4 @@
-📖 # Projeto Dicionário 🔥
+# 📖 Projeto Dicionário 🔥
 
 Este projeto é uma aplicação Laravel no intuito de realizar pesquisas de palavras em ingles em um dicionário utilizando como base Free Dictionary API, proporcionando ao usuário obter detalhes especificados da palavra selecionada.
 
