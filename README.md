@@ -1,10 +1,10 @@
-# Projeto Dicionário
+# Projeto Dicionário 🔥📖
 
 Este projeto é uma aplicação Laravel no intuito de realizar pesquisas de palavras em ingles em um dicionário utilizando como base Free Dictionary API, proporcionando ao usuário obter detalhes especificados da palavra selecionada.
 
 O sistema permite relizar registros de usuários para login, definir e listar as palavras favoritas do usuário, pesquisar os detalhes das palavras selecionadas e registrar e visualizar o histórico de pesquisa do próprio usuário.
 
-## Tecnologias e Ferramentas
+## Tecnologias e Ferramentas 💡
 
 - **PHP:** 8.2.12
 - **Laravel:** 10.48.22
@@ -20,7 +20,7 @@ O sistema permite relizar registros de usuários para login, definir e listar as
 - Sistema operacional de preferência uma " Distribuição do Linux".
 - GitHub Instalado.
 
-## Configuração do Projeto
+## Configuração do Projeto 🛠️
 
 1. **Clonar o Repositório:**
 
@@ -191,7 +191,7 @@ As rotas abaixo recebem os seguintes parâmetros:
 - **GET** `/api/words/{word}`
    '{word}' => palavra sde configuração;
 
-## Emails
+## Emails ✉️
 
 O projeto utiliza uma funcionalidade de envio de emails para cada interação que o usuário solicitar quando esquecer sua chave de acesso.
 
@@ -199,21 +199,21 @@ O projeto utiliza uma funcionalidade de envio de emails para cada interação qu
 
 Não esqueça de realizar as configurações do seu provedor de email SMTP no arquivo .env antes de usar essa funcionalidade!
 
-## Roles e Permissões
+## Roles e Permissões 🤝
 
 O projeto inclui dois tipos de categoria de usuários:
 
-## Ferramentas
+## Ferramentas 🪛
 
 - **Mailtrap:** Usado para testar o envio de e-mails durante o desenvolvimento.
 - **Insomnia:** Utilizado para testar e documentar as rotas da API.
 - **Swagger:** Utilizado para documentar as rotas da APIResources
   `php artisan l5-swagger:generate`
 
-## Contribuição
+## Contribuição 🤲
 
 Contribuições são bem-vindas! Se você encontrar problemas ou tiver sugestões, sinta-se à vontade para abrir uma issue ou enviar um pull request.
 
-## Licença
+## Licença 😸
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
