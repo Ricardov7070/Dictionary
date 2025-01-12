@@ -63,6 +63,9 @@ RUN composer require phpmailer/phpmailer
 RUN composer require darkaonline/l5-swagger && \
     php artisan vendor:publish --provider "L5Swagger\L5SwaggerServiceProvider"
 
+# Instala o Redis
+RUN composer require predis/predis:^2.0
+
 # Copiando arquivos do projeto para o container
 COPY . .
 

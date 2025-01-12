@@ -69,6 +69,9 @@ O sistema permite relizar registros de usuários para login, definir e listar as
     `composer require darkaonline/l5-swagger`
     `php artisan vendor:publish --provider "L5Swagger\L5SwaggerServiceProvider"`
 
+    Instalar o Redis no Laravel 
+    `composer require predis/predis:^2.0`
+
     Gerar uma chave de aplicação Laravel para configurar a criptografia.
     `php artisan key:generate`
 

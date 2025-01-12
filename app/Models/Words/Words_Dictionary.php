@@ -9,6 +9,7 @@ use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Cache;
 
 
 class Words_Dictionary extends Authenticatable
@@ -28,15 +29,25 @@ class Words_Dictionary extends Authenticatable
 
     public function viewWords ($perPage, $search, $page, $order): LengthAwarePaginator {
         
-        $query = self::whereNull('deleted_at')->select('words');
+        $cacheKey = "view_words_{$perPage}_{$search}_{$page}_{$order}";
 
-        if ($search) {
-            $query->where('words', 'like', '%' . $search . '%');
-        }
+        $cacheTime = 10;
 
-        $query->orderBy('words', $order);
+        return Cache::remember($cacheKey, $cacheTime, function () use ($perPage, $search, $page, $order): LengthAwarePaginator {
+           
+            $query = self::whereNull('deleted_at')->select('words');
 
-        return $query->paginate($perPage, ['*'], 'page', $page);
+            if ($search) {
+
+                $query->where('words', 'like', '%' . $search . '%');
+
+            }
+
+            $query->orderBy('words', $order);
+
+            return $query->paginate($perPage, ['*'], 'page', $page);
+
+        });
 
     }
 
@@ -53,11 +64,21 @@ class Words_Dictionary extends Authenticatable
 
     public function wordData ($word): JsonResponse {
 
-        $url = "https://api.dictionaryapi.dev/api/v2/entries/en/{$word}";
-        
-        $response = Http::withOptions(['verify' => false])->get($url);
+        $cacheKey = "word_data_{$word}";
 
-        return response()->json($response->json());
+        $cacheTime = 60;
+
+        $data = Cache::remember($cacheKey, $cacheTime, function () use ($word): mixed {
+         
+            $url = "https://api.dictionaryapi.dev/api/v2/entries/en/{$word}";
+
+            $response = Http::withOptions(['verify' => false])->get($url);
+
+            return $response->json();
+
+        });
+
+        return response()->json($data);
 
     }
 
