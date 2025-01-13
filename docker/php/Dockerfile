@@ -36,6 +36,14 @@ RUN php -v && node -v && npm -v
 # Configurando o diretório de trabalho
 WORKDIR /var/www/laravel
 
+# Instala as dependências necessárias e a extensão PDO MySQL
+RUN apt-get update && apt-get install -y \
+    libmariadb-dev && \
+    docker-php-ext-install pdo_mysql
+
+# Limpe os arquivos temporários para reduzir o tamanho da imagem
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+
 # Copiando arquivos do projeto para o container
 COPY . .
 

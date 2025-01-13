@@ -168,8 +168,6 @@ class userManagementController extends Controller
             ], 400);
     
         } catch (\Throwable $th) {
-
-            dd($th);
         
             return response()->json([
                 'error' => 'An error occurred, try again!',
@@ -179,6 +177,7 @@ class userManagementController extends Controller
 
     }
 
+    
 // Realiza a validação da existência de usuários já salvos no banco de dados.
     public function validatorUsersRegistered ($request): JsonResponse {
 
