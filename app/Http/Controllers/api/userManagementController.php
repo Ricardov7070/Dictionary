@@ -168,6 +168,8 @@ class userManagementController extends Controller
             ], 400);
     
         } catch (\Throwable $th) {
+
+            dd($th);
         
             return response()->json([
                 'error' => 'An error occurred, try again!',
