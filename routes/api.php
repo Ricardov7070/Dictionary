@@ -2,9 +2,9 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\userManagementController;
-use App\Http\Controllers\Api\wordsManagementController;
-use App\Http\Controllers\Api\wordsApiProxyController;
+use App\Http\Controllers\api\userManagementController;
+use App\Http\Controllers\api\wordsManagementController;
+use App\Http\Controllers\api\wordsApiProxyController;
 
 Route::get('/', [UserManagementController::class, 'index']);
 Route::get('/words/{word}', [wordsApiProxyController::class, 'fetchWordDetails']);
